@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, Path, UploadFile, File, Query
 from typing import Optional, List
-from backend.app.db.session import get_db
+from app.db.session import get_db
 from sqlalchemy.orm import Session
 from uuid import uuid4
 from datetime import datetime
 import os
-from backend.app.models import models
-from backend.app.schemas import schemas
-from backend.app.core import security
-from backend.app.services import serviciu_ai
+from app.models import models
+from app.schemas import schemas
+from app.core import security
+from app.services import serviciu_ai
 
 router = APIRouter(prefix="/diagnostice", tags=["Diagnostice"])
 

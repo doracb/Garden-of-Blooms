@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from typing import Optional, List
-from backend.app.db.session import get_db
+from app.db.session import get_db
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
-from backend.app.models import models
-from backend.app.schemas import schemas
-from backend.app.core import security
+from app.models import models
+from app.schemas import schemas
+from app.core import security
 
 router = APIRouter(prefix="/produse", tags=["Produse"])
 
@@ -49,7 +49,7 @@ def get_toate_produsele(
     toxic_copii: Optional[bool] = Query(None, description="Bifează true pentru toxice, false pentru sigure"),
     adaugate_recent: Optional[bool] = Query(False, description="Dacă e true, aduce doar produsele din ultimele 7 zile"),
     offset: int = Query(0, ge=0),
-    limit: int = Query(10, le=100)
+    limit: int = Query(9, le=100)
     ):
     query = db.query(models.Produs)
     if cautare:

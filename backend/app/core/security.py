@@ -2,8 +2,8 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-from backend.app.models import models
-from backend.app.db.session import get_db
+from app.models import models
+from app.db.session import get_db
 from datetime import datetime, timezone, timedelta
 import jwt
 

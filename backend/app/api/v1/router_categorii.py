@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Path
-from backend.app.db.session import get_db
+from typing import List
+from app.db.session import get_db
 from sqlalchemy.orm import Session
-from backend.app.models import models
-from backend.app.schemas import schemas
-from backend.app.core import security
+from app.models import models
+from app.schemas import schemas
+from app.core import security
 
 router = APIRouter(prefix="/categorii", tags=["Categorii"])
 
@@ -31,6 +32,11 @@ def get_categorie(
         raise HTTPException(status_code=404, detail="Categoria nu a fost găsită.")
     
     return db_categorie
+
+@router.get("/", response_model=List[schemas.CategorieResponse])
+def get_toate_categoriile(db: Session = Depends(get_db)):
+    db_categorii = db.query(models.Categorie).all()
+    return db_categorii
 
 @router.put("/{id_categorie}", response_model=schemas.CategorieResponse, dependencies=[Depends(security.get_current_admin)])
 def update_categorie(
