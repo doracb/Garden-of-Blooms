@@ -63,7 +63,7 @@ def aplica_reduceri_perisabilitate(
     )
     db.commit()
 
-    return {"mesaj": f"Reducerile de {procent_reducere}% au fost aplicate pentru produsele în stoc de peste {zile_vechime} zile."}
+    return {"mesaj": f"Reducerile de {procent_reducere}% au fost aplicate."}
 
 @router.get("/{id_administrator}", response_model=schemas.AdministratorResponse, dependencies=[Depends(security.get_current_admin)])
 def get_administrator(

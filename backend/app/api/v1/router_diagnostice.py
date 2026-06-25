@@ -12,7 +12,7 @@ from app.services import serviciu_ai
 
 router = APIRouter(prefix="/diagnostice", tags=["Diagnostice"])
 
-@router.post("/", response_model=schemas.DiagnosticAIResponse)
+@router.post("/", response_model=schemas.DiagnosticCuRecomandareResponse)
 def create_diagnostic(
     poza: UploadFile = File(...), 
     db: Session = Depends(get_db),
@@ -59,6 +59,7 @@ def create_diagnostic(
     
     raspuns_complet = {
         "id_diagnostic": nou_diagnostic.id_diagnostic,
+        "id_client": nou_diagnostic.id_client,
         "poza_url": nou_diagnostic.poza_url,
         "boala_detectata": nou_diagnostic.boala_detectata,
         "procent_incredere": float(nou_diagnostic.procent_incredere),
@@ -85,7 +86,7 @@ def get_diagnostic(
     
     return db_diagnostic
 
-@router.get("/", response_model=List[schemas.DiagnosticAIResponse])
+@router.get("/", response_model=List[schemas.DiagnosticCuRecomandareResponse])
 def get_toate_diagnosticele(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(security.get_current_user),
@@ -115,7 +116,32 @@ def get_toate_diagnosticele(
     
     diagnostice_filtrate = query.offset(offset).limit(limit).all()
     
-    return diagnostice_filtrate
+    rezultate_complete = []
+    for diag in diagnostice_filtrate:
+        # Căutăm recomandarea în dicționarul din serviciu_ai
+        detalii = serviciu_ai.RECOMANDARI_BOLI.get(diag.boala_detectata, {
+            "recomandare": "Contactați un specialist pentru o analiză detaliată.",
+            "produs_cautat": ""
+        })
+
+        produse_rec = []
+        if detalii["produs_cautat"]:
+            produse_rec = db.query(models.Produs).filter(
+                models.Produs.denumire.ilike(f"%{detalii['produs_cautat']}%")
+            ).all()
+
+        rezultate_complete.append({
+            "id_diagnostic": diag.id_diagnostic,
+            "id_client": diag.id_client,
+            "poza_url": diag.poza_url,
+            "boala_detectata": diag.boala_detectata,
+            "procent_incredere": float(diag.procent_incredere),
+            "data_analizei": diag.data_analizei,
+            "sfat_ingrijire": detalii["recomandare"],
+            "produse_sugerate": produse_rec
+        })
+        
+    return rezultate_complete
 
 @router.put("/{id_diagnostic}", response_model=schemas.DiagnosticAIResponse)
 def update_diagnostic(

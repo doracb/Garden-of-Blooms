@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from app.models import models
 from app.schemas import schemas
 from app.core import security
+from sqlalchemy.exc import IntegrityError
 
 router = APIRouter(prefix="/produse", tags=["Produse"])
 
@@ -26,12 +27,43 @@ def create_produs(
     
     return nou_produs
 
+@router.post("/recomandari", response_model=List[schemas.ProdusResponse])
+def get_recomandari_quiz(quiz: schemas.QuizRecomandare, db: Session = Depends(get_db)):
+    query = db.query(models.Produs).filter(models.Produs.stoc > 0)
+
+    if quiz.are_animale:
+        query = query.filter(models.Produs.toxic_animale == False)
+    if quiz.are_copii:
+        query = query.filter(models.Produs.toxic_copii == False)
+    if quiz.mediu_viata and quiz.mediu_viata != "Oricare":
+        query = query.filter(
+            (models.Produs.mediu_viata == quiz.mediu_viata) | 
+            (models.Produs.mediu_viata == "Interior/Exterior")
+        )
+
+    if quiz.necesar_lumina and quiz.necesar_lumina != "Nu știu sigur":
+        valori_acceptate = []
+        if quiz.necesar_lumina == "Scăzut":
+            valori_acceptate = ["Semiumbră", "Tolerantă la umbră"]
+        elif quiz.necesar_lumina == "Mediu":
+            valori_acceptate = ["Lumină indirectă"]
+        elif quiz.necesar_lumina == "Ridicat":
+            valori_acceptate = ["Soare direct", "Lumină intensă", "Lumină puternică", "Soare parțial"]
+            
+        if valori_acceptate:
+            query = query.filter(models.Produs.necesar_lumina.in_(valori_acceptate))
+            
+    if quiz.dificultate_ingrijire:
+        query = query.filter(models.Produs.dificultate_ingrijire == quiz.dificultate_ingrijire)
+
+    return query.limit(6).all()
+
 @router.get("/{id_produs}", response_model=schemas.ProdusResponse)
 def get_produs(
     id_produs: int = Path(..., gt=0), 
     db: Session = Depends(get_db)
     ):
-    db_produse = db.query(models.Produse).filter(models.Produs.id_produs == id_produs).first()
+    db_produse = db.query(models.Produs).filter(models.Produs.id_produs == id_produs).first()
     
     if db_produse is None:
         raise HTTPException(status_code=404, detail="Produsul nu a fost găsit.")
@@ -108,7 +140,14 @@ def delete_produs(
     if db_produs is None:
         raise HTTPException(status_code=404, detail="Produsul nu a fost găsit.")
     
-    db.delete(db_produs)
-    db.commit()
+    try:
+        db.delete(db_produs)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=400, 
+            detail="Acest produs nu poate fi șters definitiv deoarece există în istoricul comenzilor clienților. Setați stocul la 0 pentru a-l retrage de la vânzare."
+        )
     
-    return {"mesaj": f"Produsul cu ID-ul {id_produs} a fost ștears cu succes."}
+    return {"mesaj": f"Produsul cu ID-ul {id_produs} a fost șters cu succes."}

@@ -109,7 +109,7 @@ def actualizeaza_status_comanda(
         raise HTTPException(status_code=404, detail="Comanda nu a fost găsită.")
 
     db_comanda.status = noul_status
-    db.commit() # declanseaza trigger
+    db.commit()
     db.refresh(db_comanda)
 
     return db_comanda

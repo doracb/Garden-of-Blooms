@@ -89,19 +89,6 @@ class ProdusResponse(ProdusCreate):
     class Config:
         from_attributes = True
 
-class DiagnosticCuRecomandareResponse(BaseModel):
-    id_diagnostic: int
-    poza_url: str
-    boala_detectata: str
-    procent_incredere: float
-    data_analizei: datetime
-    
-    sfat_ingrijire: str
-    produse_sugerate: List[ProdusResponse] = []
-
-    class Config:
-        from_attributes = True
-
 class ClientCreate(BaseModel):
     id_client: int
     telefon: Optional[str] = None
@@ -143,6 +130,13 @@ class DiagnosticAIResponse(BaseModel):
 
     class Config:
         from_attributes = True
+ 
+class DiagnosticCuRecomandareResponse(DiagnosticAIResponse):
+    sfat_ingrijire: str
+    produse_sugerate: List[ProdusResponse] = []
+
+    class Config:
+        from_attributes = True
        
 class ComandaCreate(BaseModel):
     id_client: int
@@ -178,3 +172,10 @@ class RandComandaResponse(RandComandaCreate):
 
     class Config:
         from_attributes = True
+        
+class QuizRecomandare(BaseModel):
+    mediu_viata: Optional[str] = None
+    necesar_lumina: Optional[str] = None
+    dificultate_ingrijire: Optional[str] = None
+    are_animale: bool = False
+    are_copii: bool = False

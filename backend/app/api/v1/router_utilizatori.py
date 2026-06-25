@@ -49,6 +49,10 @@ def get_user(
     
     return db_user
 
+@router.get("/profil/me", response_model=schemas.UserResponse)
+def get_utilizator_curent(current_user: models.User = Depends(security.get_current_user)):
+    return current_user
+
 @router.post("/login")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == form_data.username).first()

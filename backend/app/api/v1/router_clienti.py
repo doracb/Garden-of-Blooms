@@ -51,11 +51,9 @@ def vizualizare_puncte(
     db: Session = Depends(get_db), 
     current_user: models.User = Depends(security.get_current_user)
 ):
-    # Ne asigurăm că e client
     if current_user.rol == "administrator":
         raise HTTPException(status_code=403, detail="Administratorii nu au profil de fidelitate.")
-    
-    # Căutăm profilul de client asociat acestui utilizator
+
     profil_client = db.query(models.Client).filter(models.Client.id_client == current_user.id_utilizator).first()
     
     if not profil_client:
