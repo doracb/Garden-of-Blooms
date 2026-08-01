@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Form, Button, Card, Alert, Container } from 'react-bootstrap';
 import { setCredentials } from '../store/authSlice';
 
@@ -50,8 +50,38 @@ const Login = () => {
 
             const userData = await meResponse.json();
 
+            if (userData.rol === 'administrator') {
+                try {
+                    const adminResponse = await fetch(`http://localhost:8000/api/v1/administratori/${userData.id_utilizator}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (adminResponse.ok) {
+                        const adminData = await adminResponse.json();
+                        userData.departament = adminData.departament;
+                    }
+                } catch (adminErr) {
+                    console.error("Nu am putut prelua departamentul:", adminErr);
+                }
+            }
+
             dispatch(setCredentials({ token, user: userData }));
-            navigate('/');
+
+            if (userData.rol === 'administrator') {
+                if (userData.departament === 'Management' || userData.departament === 'Director') {
+                    navigate('/admin');
+                } else if (userData.departament === 'Vanzari') {
+                    navigate('/admin/comenzi');
+                } else if (userData.departament === 'Inventar') {
+                    navigate('/admin/produse');
+                } else {
+                    navigate('/');
+                }
+            } else {
+                navigate('/');
+            }
 
         } catch (err) {
             setEroare(err.message);
@@ -99,7 +129,13 @@ const Login = () => {
                         {loading ? 'Se încarcă...' : 'Intră în cont'}
                     </Button>
                 </Form>
-            </Card>
+                <div className="mt-4 text-center">
+                    <span className="text-muted">Nu ai un cont? </span>
+                    <Link to="/register" className="text-primary text-decoration-none fw-bold">
+                        Creează unul aici
+                    </Link>
+                </div>
+            </Card> 
         </Container>
     );
 };

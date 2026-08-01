@@ -10,6 +10,7 @@ import Catalog from './components/Catalog';
 import Cart from './components/Cart';
 import Checkout from './components/Checkout';
 import Login from './components/Login';
+import Register from './components/Register';
 import Profil from './components/Profil';
 import Diagnostic from './components/Diagnostic';
 import ProdusDetalii from './components/ProdusDetalii';
@@ -129,6 +130,7 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/profil" element={<Profil />} />
         <Route path="/diagnostic" element={<Diagnostic />} />
         <Route path="/quiz" element={<QuizRecomandare />} />
