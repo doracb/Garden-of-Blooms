@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Badge, Spinner } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../store/cartSlice';
@@ -12,6 +12,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const ProdusDetalii = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   
   const [produs, setProdus] = useState(null);
@@ -48,9 +49,13 @@ const ProdusDetalii = () => {
 
   return (
     <Container className="mt-4 mb-5">
-      <Link to="/" className="text-secondary text-decoration-none mb-3 d-inline-block">
-        <ArrowBackIcon fontSize="small" /> Înapoi la Catalog
-      </Link>
+      <div 
+        onClick={() => navigate(-1)} 
+        className="text-secondary mb-3 d-inline-block" 
+        style={{ cursor: 'pointer' }}
+      >
+        <ArrowBackIcon fontSize="small" /> Înapoi
+      </div>
       
       <Row className="bg-white p-4 rounded shadow-sm border">
         <Col md={6} className="text-center mb-4 mb-md-0">
@@ -71,40 +76,45 @@ const ProdusDetalii = () => {
             Adaugă în Coș
           </Button>
 
-          <Card className="border-0 bg-light shadow-sm">
-            <Card.Header className="bg-primary text-white fw-bold">
-              <SpaIcon fontSize="small" className="me-2" />
-              Instrucțiuni de îngrijire
-            </Card.Header>
-            <Card.Body>
+          {/* AICI ESTE MODIFICAREA: Verificăm dacă produsul face parte din categoriile de plante (ID-uri 1, 2, 3) */}
+          {[1, 2, 3].includes(produs.id_categorie) && (
+            <Card className="border-0 bg-light shadow-sm mb-3">
+              <Card.Header className="bg-primary text-white fw-bold">
+                <SpaIcon fontSize="small" className="me-2" />
+                Instrucțiuni de îngrijire
+              </Card.Header>
+              <Card.Body>
               <ul className="list-unstyled mb-0">
-                <li className="mb-3">
-                  <WaterDropIcon className="text-info me-2" />
-                  <strong>Frecvența udării:</strong> {produs.frecventa_udare || 'Standard'}
-                </li>
-                <li className="mb-3">
-                  <WbSunnyIcon className="text-warning me-2" />
-                  <strong>Necesar lumină:</strong> {produs.necesar_lumina || 'Lumină indirectă'}
-                </li>
-                <li className="mb-3">
-                  <SpaIcon className="text-success me-2" />
-                  <strong>Dificultate:</strong> <Badge bg={produs.dificultate_ingrijire === 'Ușoară' ? 'success' : 'warning'}>{produs.dificultate_ingrijire || 'Medie'}</Badge>
-                </li>
+                  <li className="mb-3">
+                    <WaterDropIcon className="text-info me-2" />
+                    <strong>Frecvența udării:</strong> {produs.frecventa_udare}
+                  </li>
+                  <li className="mb-3">
+                    <WbSunnyIcon className="text-warning me-2" />
+                    <strong>Necesar lumină:</strong> {produs.necesar_lumina}
+                  </li>
+                  <li className="mb-3">
+                    <SpaIcon className="text-success me-2" />
+                    <strong>Dificultate:</strong> <Badge bg={produs.dificultate_ingrijire === 'Ușoară' ? 'success' : 'warning'}>{produs.dificultate_ingrijire}</Badge>
+                  </li>
+                </ul>
+              </Card.Body>
+            </Card>
+          )}
 
-                {(produs.toxic_animale || produs.toxic_copii || produs.avertismente_speciale) && (
-                  <>
-                    <hr />
-                    <li className="text-danger small">
-                      <WarningAmberIcon fontSize="small" className="me-1" />
-                      <strong>Atenție:</strong> {produs.toxic_animale ? 'Toxic pentru animale. ' : ''} 
-                      {produs.toxic_copii ? 'A nu se lăsa la îndemâna copiilor. ' : ''}
-                      {produs.avertismente_speciale}
-                    </li>
-                  </>
-                )}
-              </ul>
-            </Card.Body>
-          </Card>
+          {/* Avertismentele de toxicitate rămân vizibile pentru toate categoriile (inclusiv fertilizanți) */}
+          {(produs.toxic_animale || produs.toxic_copii || produs.avertismente_speciale) && (
+            <Card className="border-0 bg-light shadow-sm border-danger">
+              <Card.Body className="p-3">
+                <div className="text-danger small">
+                  <WarningAmberIcon fontSize="small" className="me-1" />
+                  <strong>Atenție:</strong> {produs.toxic_animale ? 'Toxic pentru animale. ' : ''} 
+                  {produs.toxic_copii ? 'A nu se lăsa la îndemâna copiilor. ' : ''}
+                  {produs.avertismente_speciale}
+                </div>
+              </Card.Body>
+            </Card>
+          )}
 
         </Col>
       </Row>

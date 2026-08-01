@@ -3,6 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Container, Card, Form, Button, Alert, Row, Col, Spinner, Modal } from 'react-bootstrap';
 import { logout } from '../store/authSlice';
+import { clearFavorite } from '../store/favoriteSlice';
+import { clearCart } from '../store/cartSlice';
 import LocalFloristIcon from '@mui/icons-material/LocalFlorist';
 
 const Profil = () => {
@@ -155,6 +157,15 @@ const Profil = () => {
     }
   };
 
+  const handleLogout = () => {
+    dispatch(clearFavorite());
+    dispatch(clearCart());
+
+    dispatch(logout());
+
+    navigate('/');
+  };
+
   const handleStergeCont = async () => {
     setLoadingStergere(true);
     try {
@@ -166,8 +177,7 @@ const Profil = () => {
       if (!response.ok) throw new Error("Nu am putut șterge contul.");
 
       setShowModalStergere(false);
-      dispatch(logout());
-      navigate('/');
+      handleLogout();
     } catch (err) {
       alert("Eroare la ștergerea contului: " + err.message);
       setLoadingStergere(false);
@@ -185,7 +195,7 @@ const Profil = () => {
 
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h3 className="text-primary fw-bold m-0">Contul tău</h3>
-            <Button variant="outline-primary" size="sm" onClick={() => { dispatch(logout()); navigate('/'); }}>
+            <Button variant="outline-primary" size="sm" onClick={handleLogout}>
               Deconectare
             </Button>
           </div>

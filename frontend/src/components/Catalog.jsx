@@ -3,29 +3,31 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Row, Col, Card, Form, Button, Spinner } from 'react-bootstrap';
 import { addToCart } from '../store/cartSlice';
 import { toggleFavorite } from '../store/favoriteSlice';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 
 const Catalog = () => {
     const dispatch = useDispatch();
-
     const favoriteItems = useSelector((state) => state.favorite?.items || []);
+
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const [produse, setProduse] = useState([]);
     const [categorii, setCategorii] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [pagina, setPagina] = useState(1);
+
+    const [pagina, setPagina] = useState(Number(searchParams.get('pagina')) || 1);
 
     const [filtre, setFiltre] = useState({
-        cautare: '',
-        id_categorie: '',
-        pret_min: '',
-        pret_max: '',
-        sigure_animale: false,
-        sigure_copii: false,
-        adaugate_recent: false
+        cautare: searchParams.get('cautare') || '',
+        id_categorie: searchParams.get('id_categorie') || '',
+        pret_min: searchParams.get('pret_min') || '',
+        pret_max: searchParams.get('pret_max') || '',
+        sigure_animale: searchParams.get('sigure_animale') === 'true',
+        sigure_copii: searchParams.get('sigure_copii') === 'true',
+        adaugate_recent: searchParams.get('adaugate_recent') === 'true'
     });
 
     const fetchCategorii = async () => {
@@ -53,7 +55,7 @@ const Catalog = () => {
             if (filtre.adaugate_recent) params.append('adaugate_recent', true);
             params.append('limit', 9);
             params.append('offset', (pagina - 1) * 9);
-            
+
             const response = await fetch(`http://localhost:8000/api/v1/produse?${params.toString()}`);
             const data = await response.json();
             setProduse(data);
@@ -69,6 +71,18 @@ const Catalog = () => {
     }, []);
 
     useEffect(() => {
+        const urlParams = new URLSearchParams();
+        if (filtre.cautare) urlParams.set('cautare', filtre.cautare);
+        if (filtre.id_categorie) urlParams.set('id_categorie', filtre.id_categorie);
+        if (filtre.pret_min) urlParams.set('pret_min', filtre.pret_min);
+        if (filtre.pret_max) urlParams.set('pret_max', filtre.pret_max);
+        if (filtre.sigure_animale) urlParams.set('sigure_animale', 'true');
+        if (filtre.sigure_copii) urlParams.set('sigure_copii', 'true');
+        if (filtre.adaugate_recent) urlParams.set('adaugate_recent', 'true');
+        urlParams.set('pagina', pagina);
+
+        setSearchParams(urlParams, { replace: true });
+
         fetchProduse();
     }, [filtre, pagina]);
 
@@ -169,7 +183,6 @@ const Catalog = () => {
                                 return (
                                     <Col key={produs.id_produs}>
                                         <Card className="h-100 shadow-sm border-0 position-relative">
-
                                             <div
                                                 style={{
                                                     position: 'absolute',
@@ -230,7 +243,7 @@ const Catalog = () => {
                     )}
                 </Col>
             </Row>
-            
+
             <div className="d-flex justify-content-between align-items-center mt-5 my-4">
                 <Button
                     variant="outline-primary"
