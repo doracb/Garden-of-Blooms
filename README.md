@@ -19,6 +19,8 @@ The platform features a dynamic catalog equipped with fast filters for category,
 
 ![Product Details and Care Instructions](backend/static/screenshots/product_details.jpeg)
 *A product's page, featuring care instructions.*
+<br>
+<br>
 
 **Interactive Recommendation System**
 
@@ -26,6 +28,8 @@ To combat decision fatigue, the app includes a Smart Plant Quiz that asks simple
 
 ![Quiz Results](backend/static/screenshots/quiz_results.jpeg)
 *The results of the interactive quiz.*
+<br>
+<br>
 
 **AI Plant Doctor** 
 
@@ -33,6 +37,8 @@ Users can access immediate post-sale support by uploading a photo of a sick plan
 
 ![AI Diagnosis and Cross-selling](backend/static/screenshots/ai_diagnosis_report.jpeg)
 *The results of an image diagnosis, featuring recommended treatments from the catalog.*
+<br>
+<br>
 
 **Admin Dashboard & Business Intelligence**
 
